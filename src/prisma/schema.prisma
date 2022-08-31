@@ -1,0 +1,97 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Team {
+  id         Int      @id @default(autoincrement())
+  name       String   @db.VarChar(64)
+  country    String   @db.VarChar(3)
+  groupOrder Int      @map("group_order")
+  createdAt  DateTime @default(now()) @map("created_at")
+  updatedAt  DateTime @default(now()) @updatedAt @map("updated_at")
+
+  @@map("teams")
+}
+
+model Venue {
+  id        Int      @id @default(autoincrement())
+  url       String   @db.VarChar(255)
+  stadium   String   @db.VarChar(64)
+  tzOffset  Int      @map("tz_offzet")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @default(now()) @updatedAt @map("updated_at")
+  matches   Match[]
+
+  @@map("venues")
+}
+
+model Stage {
+  id        Int      @id @default(autoincrement())
+  name      String   @db.VarChar(32)
+  isGroup   Boolean  @map("is_group")
+  sortOrder Int      @map("sort_order")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @default(now()) @updatedAt @map("updated_at")
+  matches   Match[]
+
+  @@map("stages")
+}
+
+model Match {
+  id            Int      @id @default(autoincrement())
+  matchNo       Int      @map("match_no")
+  kickoff       DateTime
+  homeTeamId    Int      @map("home_team_id")
+  awayTeamId    Int      @map("away_team_id")
+  homeGoals     Int      @map("home_goals")
+  awayGoals     Int      @map("away_goals")
+  homePenalties Int      @map("home_penalties")
+  awayPenalties Int      @map("away_penalties")
+  venueId       Int      @map("venue_id")
+  stageId       Int      @map("stage_id")
+  isResult      Boolean  @default(false) @map("is_result")
+  extraTime     Boolean  @default(false) @map("extra_time")
+  scored        Boolean  @default(false)
+  createdAt     DateTime @default(now()) @map("created_at")
+  updatedAt     DateTime @default(now()) @updatedAt @map("updated_at")
+  venue         Venue    @relation(fields: [venueId], references: [id])
+  stage         Stage    @relation(fields: [stageId], references: [id])
+
+  @@map("matches")
+}
+
+model User {
+  id           Int      @id @default(autoincrement())
+  name         String   @db.VarChar(100)
+  nickname     String   @db.VarChar(20)
+  email        String   @db.VarChar(100)
+  flgActive    Boolean  @default(false) @map("flg_active")
+  flgConfirmed Boolean  @default(false) @map("flg_confirmed")
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @default(now()) @updatedAt @map("updated_at")
+
+  @@map("users")
+}
+
+model Prediction {
+  id            Int      @id @default(autoincrement())
+  userId        Int      @map("user_id")
+  matchId       Int      @map("match_id")
+  homeGoals     Int      @map("home_goals")
+  awayGoals     Int      @map("away_goals")
+  homePenalties Int      @map("home_penalties")
+  awayPenalties Int      @map("away_penalties")
+  points        Int
+  createdAt     DateTime @default(now()) @map("created_at")
+  updatedAt     DateTime @default(now()) @updatedAt @map("updated_at")
+
+  @@map("predictions")
+}
